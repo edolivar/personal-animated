@@ -10,8 +10,7 @@ import { cn } from "@/lib/utils";
 import { BackgroundGradientAnimation } from "./gradientbg";
 import GridGlobe from "./gridglobe";
 import animationData from "@/data/confetti.json";
-// import MagicButton from "../MagicButton";
-
+import MagicButton from "./magic-button";
 export const BentoGrid = ({
   className,
   children,
@@ -67,7 +66,7 @@ export const BentoGridItem = ({
   };
 
   const handleCopy = () => {
-    const text = "hsu@jsmastery.pro";
+    const text = "mail@edwinolivares.com";
     navigator.clipboard.writeText(text);
     setCopied(true);
   };
@@ -76,12 +75,12 @@ export const BentoGridItem = ({
     <div
       className={cn(
         // remove p-4 rounded-3xl dark:bg-black dark:border-white/[0.2] bg-white  border border-transparent, add border border-white/[0.1] overflow-hidden relative
-        "row-span-1 relative overflow-hidden rounded-3xl border border-white/[0.1] group/bento hover:shadow-xl transition duration-200 shadow-input dark:shadow-none justify-between flex flex-col space-y-4",
+        "row-span-1 relative overflow-hidden rounded-3xl border border-black/[0.1] dark:border-white/[0.1] group/bento hover:shadow-xl transition duration-200 shadow-input dark:shadow-none justify-between flex flex-col space-y-4",
         className,
       )}
       style={{
         background:
-          "radial-gradient(circle, rgba(0, 0, 0, 1) 44%, rgba(8, 8, 8, 1) 63%, rgba(43, 43, 43, 1) 83%, rgba(51, 51, 51, 1) 100%)",
+          "radial-gradient(circle, rgba(255, 255, 255, 1) 44%, rgba(240, 240, 240, 1) 63%, rgba(200, 200, 200, 1) 83%, rgba(180, 180, 180, 1) 100%) dark:radial-gradient(circle, rgba(0, 0, 0, 1) 44%, rgba(8, 8, 8, 1) 63%, rgba(43, 43, 43, 1) 83%, rgba(51, 51, 51, 1) 100%)",
       }}
     >
       {/* add img divs */}
@@ -109,10 +108,10 @@ export const BentoGridItem = ({
             />
           )}
         </div>
-        {id === 6 && (
+        {(id === 6 || id === 1) && (
           // add background animation , remove the p tag
           <BackgroundGradientAnimation>
-            <div className="absolute z-50 inset-0 flex items-center justify-center text-white font-bold px-4 pointer-events-none text-3xl text-center md:text-4xl lg:text-7xl"></div>
+            <div className="absolute z-50 inset-0 flex items-center justify-center text-black dark:text-white font-bold px-4 pointer-events-none text-3xl text-center md:text-4xl lg:text-7xl"></div>
           </BackgroundGradientAnimation>
         )}
 
@@ -129,11 +128,12 @@ export const BentoGridItem = ({
           {/* add text-3xl max-w-96 , remove text-neutral-600 dark:text-neutral-300*/}
           {/* remove mb-2 mt-2 */}
           <div
-            className={`font-sans text-lg lg:text-3xl max-w-96 font-bold z-10`}
+            className={`font-sans text-lg lg:text-3xl max-w-96 font-bold z-10 ${
+              id === 1 || id === 6 ? "text-white" : "text-black dark:text-white"
+            }`}
           >
             {title}
           </div>
-
           {/* for the github 3d globe */}
           {id === 2 && <GridGlobe />}
 
@@ -146,7 +146,7 @@ export const BentoGridItem = ({
                   <span
                     key={i}
                     className="lg:py-4 lg:px-3 py-2 px-3 text-xs lg:text-base opacity-50 
-                    lg:opacity-100 rounded-lg text-center bg-black"
+                    lg:opacity-100 rounded-lg text-center bg-white hover:bg-black hover:text-white dark:bg-black dark:hover:bg-white dark:hover:text-black"
                   >
                     {item}
                   </span>
@@ -159,7 +159,7 @@ export const BentoGridItem = ({
                   <span
                     key={i}
                     className="lg:py-4 lg:px-3 py-2 px-3 text-xs lg:text-base opacity-50 
-                    lg:opacity-100 rounded-lg text-center bg-black"
+                    lg:opacity-100 rounded-lg text-center bg-white hover:bg-black hover:text-white dark:bg-black dark:hover:bg-white dark:hover:text-black"
                   >
                     {item}
                   </span>
@@ -169,26 +169,21 @@ export const BentoGridItem = ({
           )}
           {id === 6 && (
             <div className="mt-5 relative">
-              {/* button border magic from tailwind css buttons  */}
-              {/* add rounded-md h-8 md:h-8, remove rounded-full */}
-              {/* remove focus:ring-2 focus:ring-slate-400 focus:ring-offset-2 focus:ring-offset-slate-50 */}
-              {/* add handleCopy() for the copy the text */}
               <div
                 className={`absolute -bottom-5 right-0 ${
                   copied ? "block" : "block"
                 }`}
               >
-                {/* <img src="/confetti.gif" alt="confetti" /> */}
                 <Lottie options={defaultOptions} height={200} width={400} />
               </div>
 
-              {/* <MagicButton */}
-              {/*   title={copied ? "Email is Copied!" : "Copy my email address"} */}
-              {/*   icon={<IoCopyOutline />} */}
-              {/*   position="left" */}
-              {/*   handleClick={handleCopy} */}
-              {/*   otherClasses="!bg-[#161A31]" */}
-              {/* /> */}
+              <MagicButton
+                title={copied ? "Email is Copied!" : "Copy my email address"}
+                icon={<IoCopyOutline />}
+                position="left"
+                handleClick={handleCopy}
+                otherClasses="hover:bg-black hover:text-white dark:hover:bg-white dark:hover:text-black"
+              />
             </div>
           )}
         </div>
