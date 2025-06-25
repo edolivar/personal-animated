@@ -61,12 +61,13 @@ interface WorldProps {
   data: Position[];
 }
 
-let numbersOfRings = [0];
+// `numbersOfRings` should be managed inside a component state or ref if it's dynamic
+// let numbersOfRings = [0]; // This global variable is problematic in React
 
 export function Globe({ globeConfig, data }: WorldProps) {
+  // Use a ref for ThreeGlobe instance, which will be created by React-Three-Fiber
   const globeRef = useRef<ThreeGlobe | null>(null);
-  const groupRef = useRef();
-  const [isInitialized, setIsInitialized] = useState(false);
+  // No need for groupRef if we are directly rendering threeGlobe in JSX
 
   const defaultProps = {
     pointSize: 1,
@@ -85,18 +86,9 @@ export function Globe({ globeConfig, data }: WorldProps) {
     ...globeConfig,
   };
 
-  // Initialize globe only once
-  useEffect(() => {
-    if (!globeRef.current && groupRef.current) {
-      globeRef.current = new ThreeGlobe();
-      (groupRef.current as any).add(globeRef.current);
-      setIsInitialized(true);
-    }
-  }, []);
-
   // Build material when globe is initialized or when relevant props change
   useEffect(() => {
-    if (!globeRef.current || !isInitialized) return;
+    if (!globeRef.current) return;
 
     const globeMaterial = globeRef.current.globeMaterial() as unknown as {
       color: Color;
@@ -104,27 +96,26 @@ export function Globe({ globeConfig, data }: WorldProps) {
       emissiveIntensity: number;
       shininess: number;
     };
-    globeMaterial.color = new Color(globeConfig.globeColor);
-    globeMaterial.emissive = new Color(globeConfig.emissive);
-    globeMaterial.emissiveIntensity = globeConfig.emissiveIntensity || 0.1;
-    globeMaterial.shininess = globeConfig.shininess || 0.9;
+    globeMaterial.color = new Color(defaultProps.globeColor); // Use defaultProps here
+    globeMaterial.emissive = new Color(defaultProps.emissive);
+    globeMaterial.emissiveIntensity = defaultProps.emissiveIntensity || 0.1;
+    globeMaterial.shininess = defaultProps.shininess || 0.9;
   }, [
-    isInitialized,
-    globeConfig.globeColor,
-    globeConfig.emissive,
-    globeConfig.emissiveIntensity,
-    globeConfig.shininess,
+    defaultProps.globeColor,
+    defaultProps.emissive,
+    defaultProps.emissiveIntensity,
+    defaultProps.shininess,
   ]);
 
   // Build data when globe is initialized or when data changes
   useEffect(() => {
-    if (!globeRef.current || !isInitialized || !data) return;
+    if (!globeRef.current || !data) return;
 
     const arcs = data;
     let points = [];
     for (let i = 0; i < arcs.length; i++) {
       const arc = arcs[i];
-      const rgb = hexToRgb(arc.color) as { r: number; g: number; b: number };
+      // const rgb = hexToRgb(arc.color) as { r: number; g: number; b: number }; // rgb not used here
       points.push({
         size: defaultProps.pointSize,
         order: arc.order,
@@ -182,7 +173,7 @@ export function Globe({ globeConfig, data }: WorldProps) {
       .pointRadius(2);
 
     globeRef.current
-      .ringsData([])
+      .ringsData([]) // Initial empty rings data
       .ringColor(() => defaultProps.polygonColor)
       .ringMaxRadius(defaultProps.maxRings)
       .ringPropagationSpeed(RING_PROPAGATION_SPEED)
@@ -190,7 +181,6 @@ export function Globe({ globeConfig, data }: WorldProps) {
         (defaultProps.arcTime * defaultProps.arcLength) / defaultProps.rings,
       );
   }, [
-    isInitialized,
     data,
     defaultProps.pointSize,
     defaultProps.showAtmosphere,
@@ -205,7 +195,7 @@ export function Globe({ globeConfig, data }: WorldProps) {
 
   // Handle rings animation with cleanup
   useEffect(() => {
-    if (!globeRef.current || !isInitialized || !data) return;
+    if (!globeRef.current || !data) return;
 
     const interval = setInterval(() => {
       if (!globeRef.current) return;
@@ -230,9 +220,11 @@ export function Globe({ globeConfig, data }: WorldProps) {
     return () => {
       clearInterval(interval);
     };
-  }, [isInitialized, data]);
+  }, [data]);
 
-  return <group ref={groupRef} />;
+  // Render the ThreeGlobe component directly in JSX
+  // @ts-ignore
+  return <threeGlobe ref={globeRef} />;
 }
 
 export function WebGLRendererConfig() {
@@ -242,7 +234,7 @@ export function WebGLRendererConfig() {
     gl.setPixelRatio(window.devicePixelRatio);
     gl.setSize(size.width, size.height);
     gl.setClearColor(0xffaaff, 0);
-  }, []);
+  }, [gl, size]); // Add gl and size to dependency array
 
   return null;
 }
@@ -274,8 +266,8 @@ export function World(props: WorldProps) {
         enableZoom={false}
         minDistance={cameraZ}
         maxDistance={cameraZ}
-        autoRotateSpeed={1}
-        autoRotate={true}
+        autoRotateSpeed={globeConfig.autoRotateSpeed || 1} // Use globeConfig value
+        autoRotate={globeConfig.autoRotate || false} // Use globeConfig value
         minPolarAngle={Math.PI / 3.5}
         maxPolarAngle={Math.PI - Math.PI / 3}
       />
